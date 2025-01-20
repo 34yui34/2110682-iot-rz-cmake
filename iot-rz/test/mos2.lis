@@ -1,0 +1,241 @@
+                        ;  mos  all functions are in S2
+                        ;     Happy Sonkran Day !       13 Apr 2016
+                        ;     update to recent tools     4 Feb 2017
+                        ;     bug fix 
+                        
+                        ; memory map
+                        
+                        ; 0..900     code
+                        ; 1000       int vec
+                        ; 1500       global var
+                        ; 1700       system stack
+                        ; 2000       process queue
+                        ; 2100       PCB
+                        ; 2300       process stack
+                        
+                        .symbol
+                        	stop		0
+                        	di		15
+                        	ei		16
+                        	print		1
+                        	cnt		1600
+                        	cnt2		1601
+                        	
+                        	; global registers
+                        	sp		28     ; system stack pointer
+                        	retval		27
+                        	link		15     ; must be r1..r15
+                        
+                        	; OS variables	
+                        	qend		1510
+                        	qindex		1511
+                        	nump		1500   ; number of process
+                        	currentp	1501   ; pointer to current proc
+                        	pcbptr		1502   ; PCB block pointer
+                        	stackptr	1503   ; process stack pointer
+                        	; OS constant
+                        	Q		2000   ; Q at M[2000]
+                        
+                        .code	0
+   0 L 5 0 0            	mov r0 #0
+   1 X 31 0 15 0 20     	trap r0 #di
+                        	;  ... initialise
+   2 L 5 1 87           	mov r1 #tswitch
+   3 L 3 1 1000         	st r1 1000	 ; set int vec
+   4 L 5 28 1700        	mov sp #1700     ; sp = &1700
+   5 L 3 0 1500         	st r0 nump
+   6 L 3 0 1501         	st r0 currentp
+   7 L 5 1 2000         	mov r1 #Q	 ; Q at &2000
+   8 L 3 1 1510         	st r1 qend       ; pointer to Qend
+   9 D 4 0 1 0          	st r0 @0 r1	 ; Q[end] = 0
+  10 L 3 0 1511         	st r0 qindex	 ; qindex = 0
+  11 L 5 1 2100         	mov r1 #2100
+  12 L 3 1 1502         	st r1 pcbptr	 ; pcbptr = &2100
+  13 L 5 1 2316         	mov r1 #2316	 ; offset +16, for first popm
+  14 L 3 1 1503         	st r1 stackptr	 ; stackptr = &2316
+                        
+  15 L 5 1 117          	mov r1 #process1  ; create process1
+  16 L 7 15 28          	jal link createp
+  17 L 5 1 129          	mov r1 #process2  ; create process2
+  18 L 7 15 28          	jal link createp
+                        
+                        	; boot make zeroth process not in Q
+                        	; then switch to process in Q
+  19 L 7 15 38          	jal link newp
+  20 D 4 28 27 1        	st sp @1 retval
+  21 L 3 27 1501        	st retval currentp   ; zeroth p
+  22 L 5 1 80           	mov r1 #80	     ; settimer0(80)
+  23 X 31 1 13 0 20     	trap r1 #13
+  24 L 5 0 0            	mov r0 #0
+  25 X 31 0 16 0 20     	trap r0 #ei
+  26 X 31 0 0 0 24      	int #0               ; start by switch p
+  27 X 31 0 0 0 20      	trap r0 #stop
+                        
+                        ; creat new PCB, enqueue it
+                        ;   input: &program in r1
+                        ;   return:  process
+                        
+                        :createp		
+  28 X 31 28 15 0 21    	push sp link	   ; save ret
+  29 L 7 15 38          	jal link newp	   ; newp()
+  30 D 4 1 27 0         	st r1 @0 retval    ; p.PC = &program
+  31 X 31 1 27 0 16     	mov r1 retval	   ; keep process
+  32 L 7 15 43          	jal link newStack  ; newStack()
+  33 D 4 27 1 1         	st retval @1 r1    ; p.SP = newStack
+  34 L 7 15 48          	jal link enqueue   ; enqueue()
+  35 X 31 27 1 0 16     	mov retval r1	   ; return process
+  36 X 31 28 15 0 22    	pop sp link	   ; restore ret
+  37 X 31 15 0 0 19     	ret link
+                        
+                        ; newp()
+                        ;  a = pcbptr
+                        ;  pcbptr += 16
+                        ;  return a
+                        
+                        :newp	
+  38 L 1 5 1502         	ld r5 pcbptr
+  39 X 31 27 5 0 16     	mov retval r5	
+  40 D 10 5 5 16        	add r5 r5 #16
+  41 L 3 5 1502         	st r5 pcbptr	
+  42 X 31 15 0 0 19     	ret link
+                        
+                        :newStack
+  43 L 1 5 1503         	ld r5 stackptr
+  44 X 31 27 5 0 16     	mov retval r5	
+  45 D 10 5 5 64        	add r5 r5 #64
+  46 L 3 5 1503         	st r5 stackptr
+  47 X 31 15 0 0 19     	ret link
+                        
+                        ; enqueue(p)
+                        ;   Q[end] = p
+                        ;   Q[end+1] = 0
+                        ;   end++
+                        ;   nump++
+                        
+                        :enqueue		; input in r1
+  48 L 1 6 1510         	ld r6 qend
+  49 D 4 1 6 0          	st r1 @0 r6	; Q[end] = p
+  50 D 10 6 6 1         	add r6 r6 #1
+  51 D 4 0 6 0          	st r0 @0 r6	; Q[end+1] = 0
+  52 L 3 6 1510         	st r6 qend	; end++
+  53 L 1 6 1500         	ld r6 nump
+  54 D 10 6 6 1         	add r6 r6 #1
+  55 L 3 6 1500         	st r6 nump	; nump++
+  56 X 31 15 0 0 19     	ret link
+                        
+                        ;  terminate()
+                        ;     Q[qindex] = 1
+                        ;     nump--
+                        
+                        :terminate		; critical section
+  57 X 31 0 15 0 20     	trap r0 #di
+  58 L 1 6 1511         	ld r6 qindex
+  59 L 5 7 2000         	mov r7 #Q
+  60 L 5 5 1            	mov r5 #1
+  61 X 31 5 6 7 18      	st r5 +r6 r7	; Q[qindex] = 1
+  62 L 1 5 1500         	ld r5 nump
+  63 D 11 5 5 1         	sub r5 r5 #1
+  64 L 3 5 1500         	st r5 nump	; nump--
+  65 X 31 0 16 0 20     	trap r0 #ei
+  66 X 31 15 0 0 19     	ret link
+                        
+                        ; nextp()
+                        ;   if nump == 0 return 0
+                        ;   qindex++
+                        ;   while Q[qindex] < 2 	; is 1 or 0
+                        ;      if Q[qindex] == 0
+                        ;         qindex = 0
+                        ;      if Q[qindex] == 1
+                        ;         qindex++
+                        ;   return Q[qindex]
+                        
+                        :nextp
+  67 L 1 5 1500         	ld r5 nump
+  68 L 8 5 71           	jt r5 skip
+  69 L 5 27 0           	mov retval #0
+  70 X 31 15 0 0 19     	ret link
+  71 L 1 5 1511         :skip	ld r5 qindex
+  72 D 10 5 5 1         	add r5 r5 #1
+  73 L 5 6 2000         	mov r6 #Q
+  74 X 31 7 5 6 17      :while	ld r7 +r5 r6  	; Q[qindex]
+  75 D 19 8 7 2         	lt r8 r7 #2	; < 2
+  76 L 9 8 84           	jf r8 exit2
+  77 L 8 7 80           	jt r7 skip2	; Q[qindex] == 0
+  78 L 5 5 0            	mov r5 #0	; qindex = 0
+  79 L 6 0 74           	jmp while
+  80 D 17 8 7 1         :skip2  eq r8 r7 #1	; Q[qindex] == 1
+  81 L 9 8 84           	jf r8 exit2
+  82 D 10 5 5 1          	add r5 r5 #1
+  83 L 6 0 74           	jmp while
+  84 X 31 27 7 0 16     :exit2	mov retval r7	; ret Q[qindex]
+  85 L 3 5 1511         	st r5 qindex
+  86 X 31 15 0 0 19     	ret link
+                        
+                        :tswitch		; use r20,21
+  87 L 5 0 0            	mov r0 #0
+  88 X 31 0 15 0 20     	trap r0 #di
+  89 L 1 21 1501         	ld r21 currentp
+  90 X 31 20 0 0 28     	xch r20		; get RetAds
+  91 D 4 20 21 0        	st r20 @0 r21	; p.PC = RetAds
+  92 X 31 28 0 0 26     	pushm sp	; save current context + link
+  93 D 4 28 21 1        	st sp @1 r21	; p.SP = sp
+  94 L 7 15 67          	jal link nextp
+  95 X 31 21 27 0 16    	mov r21 retval
+  96 L 9 21 105         	jf r21 exit	; no process in the queue
+                        
+  97 L 3 21 1501        	st r21 currentp ; update currentp
+  98 D 2 28 21 1        	ld sp @1 r21    ; get p.SP
+  99 X 31 28 0 0 27     	popm sp		; restore context
+ 100 D 2 20 21 0        	ld r20 @0 r21	; get p.PC
+ 101 X 31 20 0 0 28     	xch r20		; RetAds = p.PC
+ 102 L 5 0 0            	mov r0 #0
+ 103 X 31 0 16 0 20     	trap r0 #ei	
+ 104 X 31 0 0 0 25      	reti
+ 105 X 31 0 0 0 20      :exit	trap r0 #stop
+                        
+                        ; ---------- application program ------------- 
+                        
+                        :delay			; burn cycle
+ 106 L 0 0 0            	nop
+ 107 L 0 0 0            	nop
+ 108 L 0 0 0            	nop
+ 109 L 0 0 0            	nop
+ 110 L 0 0 0            	nop
+ 111 L 0 0 0            	nop
+ 112 L 0 0 0            	nop
+ 113 L 0 0 0            	nop
+ 114 L 0 0 0            	nop
+ 115 L 0 0 0            	nop
+ 116 X 31 15 0 0 19     	ret link
+                        
+                        :process1		; count 1..10
+ 117 L 5 0 0            	mov r0 #0
+ 118 L 3 0 1600         	st r0 cnt	; cnt = 0
+ 119 L 1 5 1600         :loop1	ld r5 cnt
+ 120 D 10 5 5 1         	add r5 r5 #1
+ 121 L 3 5 1600         	st r5 cnt
+ 122 X 31 5 1 0 20      	trap r5 #print
+ 123 L 7 15 106         	jal link delay
+ 124 D 17 6 5 10        	eq r6 r5 #10
+ 125 L 9 6 119          	jf r6 loop1
+ 126 L 7 15 57                  jal link terminate
+ 127 X 31 0 0 0 24      	int #0		; force task switch
+ 128 X 31 0 0 0 20      	trap r0 #stop
+                        
+                        :process2		; count 100..110
+ 129 L 5 0 100          	mov r0 #100
+ 130 L 3 0 1601         	st r0 cnt2	; cnt2 = 100
+ 131 L 1 5 1601         :loop2	ld r5 cnt2
+ 132 D 10 5 5 1         	add r5 r5 #1
+ 133 L 3 5 1601         	st r5 cnt2
+ 134 X 31 5 1 0 20      	trap r5 #print
+ 135 L 7 15 106         	jal link delay
+ 136 D 17 6 5 110       	eq r6 r5 #110
+ 137 L 9 6 131          	jf r6 loop2
+ 138 L 7 15 57          	jal link terminate
+ 139 X 31 0 0 0 24      	int #0		; force task switch
+ 140 X 31 0 0 0 20      	trap r0 #stop
+                        
+                        .data	200
+                        .end
+                        

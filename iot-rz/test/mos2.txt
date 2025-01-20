@@ -1,0 +1,241 @@
+;  mos  all functions are in S2
+;     Happy Sonkran Day !       13 Apr 2016
+;     update to recent tools     4 Feb 2017
+;     bug fix 
+
+; memory map
+
+; 0..900     code
+; 1000       int vec
+; 1500       global var
+; 1700       system stack
+; 2000       process queue
+; 2100       PCB
+; 2300       process stack
+
+.symbol
+	stop		0
+	di		15
+	ei		16
+	print		1
+	cnt		1600
+	cnt2		1601
+	
+	; global registers
+	sp		28     ; system stack pointer
+	retval		27
+	link		15     ; must be r1..r15
+
+	; OS variables	
+	qend		1510
+	qindex		1511
+	nump		1500   ; number of process
+	currentp	1501   ; pointer to current proc
+	pcbptr		1502   ; PCB block pointer
+	stackptr	1503   ; process stack pointer
+	; OS constant
+	Q		2000   ; Q at M[2000]
+
+.code	0
+	mov r0 #0
+	trap r0 #di
+	;  ... initialise
+	mov r1 #tswitch
+	st r1 1000	 ; set int vec
+	mov sp #1700     ; sp = &1700
+	st r0 nump
+	st r0 currentp
+	mov r1 #Q	 ; Q at &2000
+	st r1 qend       ; pointer to Qend
+	st r0 @0 r1	 ; Q[end] = 0
+	st r0 qindex	 ; qindex = 0
+	mov r1 #2100
+	st r1 pcbptr	 ; pcbptr = &2100
+	mov r1 #2316	 ; offset +16, for first popm
+	st r1 stackptr	 ; stackptr = &2316
+
+	mov r1 #process1  ; create process1
+	jal link createp
+	mov r1 #process2  ; create process2
+	jal link createp
+
+	; boot make zeroth process not in Q
+	; then switch to process in Q
+	jal link newp
+	st sp @1 retval
+	st retval currentp   ; zeroth p
+	mov r1 #80	     ; settimer0(80)
+	trap r1 #13
+	mov r0 #0
+	trap r0 #ei
+	int #0               ; start by switch p
+	trap r0 #stop
+
+; creat new PCB, enqueue it
+;   input: &program in r1
+;   return:  process
+
+:createp		
+	push sp link	   ; save ret
+	jal link newp	   ; newp()
+	st r1 @0 retval    ; p.PC = &program
+	mov r1 retval	   ; keep process
+	jal link newStack  ; newStack()
+	st retval @1 r1    ; p.SP = newStack
+	jal link enqueue   ; enqueue()
+	mov retval r1	   ; return process
+	pop sp link	   ; restore ret
+	ret link
+
+; newp()
+;  a = pcbptr
+;  pcbptr += 16
+;  return a
+
+:newp	
+	ld r5 pcbptr
+	mov retval r5	
+	add r5 r5 #16
+	st r5 pcbptr	
+	ret link
+
+:newStack
+	ld r5 stackptr
+	mov retval r5	
+	add r5 r5 #64
+	st r5 stackptr
+	ret link
+
+; enqueue(p)
+;   Q[end] = p
+;   Q[end+1] = 0
+;   end++
+;   nump++
+
+:enqueue		; input in r1
+	ld r6 qend
+	st r1 @0 r6	; Q[end] = p
+	add r6 r6 #1
+	st r0 @0 r6	; Q[end+1] = 0
+	st r6 qend	; end++
+	ld r6 nump
+	add r6 r6 #1
+	st r6 nump	; nump++
+	ret link
+
+;  terminate()
+;     Q[qindex] = 1
+;     nump--
+
+:terminate		; critical section
+	trap r0 #di
+	ld r6 qindex
+	mov r7 #Q
+	mov r5 #1
+	st r5 +r6 r7	; Q[qindex] = 1
+	ld r5 nump
+	sub r5 r5 #1
+	st r5 nump	; nump--
+	trap r0 #ei
+	ret link
+
+; nextp()
+;   if nump == 0 return 0
+;   qindex++
+;   while Q[qindex] < 2 	; is 1 or 0
+;      if Q[qindex] == 0
+;         qindex = 0
+;      if Q[qindex] == 1
+;         qindex++
+;   return Q[qindex]
+
+:nextp
+	ld r5 nump
+	jt r5 skip
+	mov retval #0
+	ret link
+:skip	ld r5 qindex
+	add r5 r5 #1
+	mov r6 #Q
+:while	ld r7 +r5 r6  	; Q[qindex]
+	lt r8 r7 #2	; < 2
+	jf r8 exit2
+	jt r7 skip2	; Q[qindex] == 0
+	mov r5 #0	; qindex = 0
+	jmp while
+:skip2  eq r8 r7 #1	; Q[qindex] == 1
+	jf r8 exit2
+ 	add r5 r5 #1
+	jmp while
+:exit2	mov retval r7	; ret Q[qindex]
+	st r5 qindex
+	ret link
+
+:tswitch		; use r20,21
+	mov r0 #0
+	trap r0 #di
+ 	ld r21 currentp
+	xch r20		; get RetAds
+	st r20 @0 r21	; p.PC = RetAds
+	pushm sp	; save current context + link
+	st sp @1 r21	; p.SP = sp
+	jal link nextp
+	mov r21 retval
+	jf r21 exit	; no process in the queue
+
+	st r21 currentp ; update currentp
+	ld sp @1 r21    ; get p.SP
+	popm sp		; restore context
+	ld r20 @0 r21	; get p.PC
+	xch r20		; RetAds = p.PC
+	mov r0 #0
+	trap r0 #ei	
+	reti
+:exit	trap r0 #stop
+
+; ---------- application program ------------- 
+
+:delay			; burn cycle
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	ret link
+
+:process1		; count 1..10
+	mov r0 #0
+	st r0 cnt	; cnt = 0
+:loop1	ld r5 cnt
+	add r5 r5 #1
+	st r5 cnt
+	trap r5 #print
+	jal link delay
+	eq r6 r5 #10
+	jf r6 loop1
+        jal link terminate
+	int #0		; force task switch
+	trap r0 #stop
+
+:process2		; count 100..110
+	mov r0 #100
+	st r0 cnt2	; cnt2 = 100
+:loop2	ld r5 cnt2
+	add r5 r5 #1
+	st r5 cnt2
+	trap r5 #print
+	jal link delay
+	eq r6 r5 #110
+	jf r6 loop2
+	jal link terminate
+	int #0		; force task switch
+	trap r0 #stop
+
+.data	200
+.end
+
