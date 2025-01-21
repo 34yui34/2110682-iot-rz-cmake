@@ -1,0 +1,111 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ lastx 1100
+ ecount 1101
+ cnt1 1102
+ cnt2 1103
+ t1 1104
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun checktime pv 1
+:checktime
+; gnAsg :(cnt2 ecount )
+; gnAsg :(cnt1 cnt2 )
+; gnAsg :(t1 #1 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+add fp fp #5
+st rads @0 fp
+pop sp r1
+ld r2 ecount
+st r2 cnt2
+ld r2 cnt2
+ld r4 cnt1
+sub r3 r2 r4
+trap r3 #1
+ld r2 cnt2
+st r2 cnt1
+st r1 t1
+:L101
+ld rads @0 fp
+sub fp fp #5
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun int0 pv 0
+:int0
+; gnAsg :(#1 (call readport 11 ))
+; gnAsg :(ecount (+ ecount 1 ))
+; gnAsg :(lastx #1 )
+; gnAsg :(#2 (call readport 13 ))
+mov r3 #11
+trap r3 #18
+mov r1 r28
+ld r4 lastx
+ne r3 r1 r4
+jf r3 L103
+eq r3 r1 #5
+jf r3 L104
+ld r3 ecount
+add r4 r3 #1
+st r4 ecount
+:L104
+:L103
+st r1 lastx
+mov r3 #13
+trap r3 #18
+mov r2 r28
+ld r4 t1
+add r5 r4 #4000
+gt r3 r2 r5
+jf r3 L105
+push sp r2
+jal rads checktime
+:L105
+:L102
+reti
+; fun main pv 0
+:main
+; gnAsg :(lastx (call readport 11 ))
+; gnAsg :(ecount 0 )
+; gnAsg :(t1 0 )
+; gnAsg :(cnt1 0 )
+st r1 @1 fp
+add fp fp #2
+st rads @0 fp
+mov r1 #int0
+st r1 1000
+mov r1 #200
+trap r1 #13
+mov r1 #11
+trap r1 #18
+st r28 lastx
+mov r1 #0
+st r1 ecount
+mov r1 #0
+st r1 t1
+mov r1 #0
+st r1 cnt1
+jmp L107
+:L108
+swi
+:L107
+mov r1 #1
+jt r1 L108
+:L106
+ld rads @0 fp
+sub fp fp #2
+ld r1 @1 fp
+ret rads
+.data 200
+.end

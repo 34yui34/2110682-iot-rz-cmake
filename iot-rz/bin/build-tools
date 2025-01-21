@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Function to convert a relative path to an absolute path
+convert_to_absolute() {
+  # Check if realpath or readlink is available
+  if command -v realpath &>/dev/null; 
+  then
+    realpath "$1"
+  elif command -v readlink &>/dev/null; 
+  then
+    readlink -f "$1"
+  else
+    # Fallback: Use pwd and resolve manually
+    absolute_dir=$(cd "$(dirname "$1")" && pwd)
+    # Combine and print the absolute path
+    printf "%s/%s\n" "$absolute_dir" "$(basename "$1")"
+  fi
+}
+
+# Determine all tools absolute path from script path
+# and the tool path relative to script path
+abs_script_path=$(dirname "$(convert_to_absolute "$0")")
+build_dir="./build"
+as21_source_relative_path="../tools/as21"
+as21_source_absolute_path="${abs_script_path%/}/$as21_source_relative_path"
+rz36_source_relative_path="../tools/rz36-2"
+rz36_source_absolute_path="${abs_script_path%/}/$rz36_source_relative_path"
+sim21_source_relative_path="../tools/sim21"
+sim21_source_absolute_path="${abs_script_path%/}/$sim21_source_relative_path"
+
+if [[ "$1" == "--clean" ]];
+then
+  echo "Clean out all build artifacts"
+  cd ${as21_source_absolute_path}
+  rm -rf ${build_dir}
+  cd ${rz36_source_absolute_path}
+  rm -rf ${build_dir}
+  cd ${sim21_source_absolute_path}
+  rm -rf ${build_dir}
+  exit 0
+elif [[ "$1" == "--build-all" ]];
+then
+  echo "Build all tools artifacts..."
+else
+  echo "Invalid build configuration specified. ERROR!!!"
+  exit 1
+fi
+
+# Build as21 tools
+cd ${as21_source_absolute_path}
+# Clean and then built CMake target
+rm -rf ${build_dir}
+cmake -B ${build_dir}
+cd ${build_dir}
+make -j4
+# Check if executable file existed
+if [ -f "as21" ];
+then
+  echo "Build as21 executable successfully."
+else
+  echo "Build as21 executable failed! ERROR"
+  exit 1
+fi
+
+# Build rz36-2 tools
+cd ${rz36_source_absolute_path}
+# Clean and then built CMake target
+rm -rf ${build_dir}
+cmake -B ${build_dir}
+cd ${build_dir}
+make -j4
+# Check if executable file existed
+if [ -f "rz36-2" ];
+then
+  echo "Build rz36-2 executable successfully."
+else
+  echo "Build rz36-2 executable failed! ERROR"
+  exit 1
+fi
+
+# Build sim21 tools
+cd ${sim21_source_absolute_path}
+# Clean and then built CMake target
+rm -rf ${build_dir}
+cmake -B ${build_dir}
+cd ${build_dir}
+make -j4
+# Check if executable file existed
+if [ -f "sim21" ];
+then
+  echo "Build sim21 executable successfully."
+else
+  echo "Build sim21 executable failed! ERROR"
+  exit 1
+fi
+

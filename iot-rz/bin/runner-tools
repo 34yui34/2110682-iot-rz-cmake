@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# Function for output debug log (normally disabled)
+debug=false
+debug_log() {
+  if [ $debug == true ];
+  then
+    echo "$1"
+  fi
+}
+
+# Function to execute the chosen tool based on tool path and input file path
+execute_tool() {
+  local tool_abs_path="$1"
+  local input_file_abs_path="$2"
+  local filename=$(basename "$tool_abs_path")
+
+  cd "$(dirname ${tool_abs_path})"
+  if [ -f ${tool_abs_path} ];
+  then
+    debug_log "Found $filename executable in build path."
+    $tool_abs_path $input_file_abs_path
+  else
+    echo "Cannot locate $filename executable in build path! Need to rebuild executable!"
+    exit 1
+  fi
+}
+
+# Function to convert a relative path to an absolute path
+convert_to_absolute() {
+  # Check if realpath or readlink is available
+  if command -v realpath &>/dev/null; 
+  then
+    realpath "$1"
+  elif command -v readlink &>/dev/null; 
+  then
+    readlink -f "$1"
+  else
+    # Fallback: Use pwd and resolve manually
+    absolute_dir=$(cd "$(dirname "$1")" && pwd)
+    # Combine and print the absolute path
+    printf "%s/%s\n" "$absolute_dir" "$(basename "$1")"
+  fi
+}
+
+# Determine all tools absolute path from script path
+# and the tool path relative to script path
+abs_script_path=$(dirname "$(convert_to_absolute "$0")")
+as21_binary_relative_path="../tools/as21/build/as21"
+as21_binary_absolute_path="${abs_script_path%/}/$as21_binary_relative_path"
+rz36_binary_relative_path="../tools/rz36-2/build/rz36-2"
+rz36_binary_absolute_path="${abs_script_path%/}/$rz36_binary_relative_path"
+sim21_binary_relative_path="../tools/sim21/build/sim21"
+sim21_binary_absolute_path="${abs_script_path%/}/$sim21_binary_relative_path"
+
+# Check if exactly two arguments are passed
+if [ "$#" -ne 2 ];
+then
+  echo "Usage: $0 <tool-type> <input-filename>"
+  echo "<tool-type> can be "as21", "rz36" or "sim21""
+  echo "<input-filename> can be absolute path or relative path"
+  exit 1  # Exit with error code if not exactly two arguments
+fi
+
+# Check if the first argument <tool-type> is valid
+if [ "$1" != "as21" ] && [ "$1" != "rz36" ] && [ "$1" != "sim21" ];
+then
+  echo "Invalid argument <tool-type>: "$1" provided. Abort!!"
+  exit 1
+else
+  debug_log "<tool-type> "$1" selected"
+fi
+
+# Determine the input file absolute path and check if it existed
+abs_input_file_path=$(convert_to_absolute "$2")
+if [ ! -e "$abs_input_file_path" ];
+then
+  echo "Invalid argument <input-filename>: "$abs_input_file_path" does not exist. Abort!!"
+  exit 1
+fi
+
+# Execute the appropriate tool
+if [ "$1" == "as21" ];
+then
+  execute_tool "$as21_binary_absolute_path" "$abs_input_file_path"
+elif [ "$1" == "rz36" ]
+then
+  execute_tool "$rz36_binary_absolute_path" "$abs_input_file_path"
+elif [ "$1" == "sim21" ]
+then
+  execute_tool "$sim21_binary_absolute_path" "$abs_input_file_path"
+fi
