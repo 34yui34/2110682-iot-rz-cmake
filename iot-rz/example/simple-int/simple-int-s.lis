@@ -1,0 +1,56 @@
+                        .symbol
+                         fp 30
+                         sp 29
+                         retval 28
+                         rads 27
+                         cnt 1100
+                        .code 0
+   0 L 5 30 3500         mov fp #3500
+   1 L 5 29 3000         mov sp #3000
+   2 L 7 27 20           jal rads main
+   3 X 31 0 0 0 20       trap r0 #0
+                        ; fun interrupt pv 0
+                        :interrupt
+                        ; gnAsg :(cnt (+ cnt 1 ))
+   4 D 4 1 30 1         st r1 @1 fp
+   5 D 4 2 30 2         st r2 @2 fp
+   6 D 10 30 30 3       add fp fp #3
+   7 D 4 27 30 0        st rads @0 fp
+   8 L 1 1 1100         ld r1 cnt
+   9 X 31 1 1 0 20      trap r1 #1
+  10 L 5 1 32           mov r1 #32
+  11 X 31 1 2 0 20      trap r1 #2
+  12 L 1 1 1100         ld r1 cnt
+  13 D 10 2 1 1         add r2 r1 #1
+  14 L 3 2 1100         st r2 cnt
+                        :L102
+  15 D 2 27 30 0        ld rads @0 fp
+  16 D 11 30 30 3       sub fp fp #3
+  17 D 2 2 30 2         ld r2 @2 fp
+  18 D 2 1 30 1         ld r1 @1 fp
+  19 X 31 27 0 0 19     ret rads
+                        ; fun main pv 0
+                        :main
+                        ; gnAsg :(cnt 0 )
+  20 D 4 1 30 1         st r1 @1 fp
+  21 D 10 30 30 2       add fp fp #2
+  22 D 4 27 30 0        st rads @0 fp
+  23 L 5 1 4            mov r1 #interrupt
+  24 L 3 1 1000         st r1 1000
+  25 L 5 1 200          mov r1 #200
+  26 X 31 1 14 0 20     trap r1 #14
+  27 L 5 1 0            mov r1 #0
+  28 L 3 1 1100         st r1 cnt
+  29 L 6 0 31           jmp L104
+                        :L105
+  30 X 31 0 17 0 20     trap r0 #17
+                        :L104
+  31 L 5 1 1            mov r1 #1
+  32 L 8 1 30           jt r1 L105
+                        :L103
+  33 D 2 27 30 0        ld rads @0 fp
+  34 D 11 30 30 2       sub fp fp #2
+  35 D 2 1 30 1         ld r1 @1 fp
+  36 X 31 27 0 0 19     ret rads
+                        .data 200
+                        .end

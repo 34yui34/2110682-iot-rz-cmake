@@ -92,7 +92,7 @@ symtype	initsym[] = {
 	{"",0,0}
 };
 
-char *strupr(char s[])
+static char *strupr(char s[])
 {
   char *p;
 

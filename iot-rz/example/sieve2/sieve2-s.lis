@@ -1,0 +1,183 @@
+                        .symbol
+                         fp 30
+                         sp 29
+                         retval 28
+                         rads 27
+                         N 1100
+                         a 1101
+                        .code 0
+   0 L 5 30 3500         mov fp #3500
+   1 L 5 29 3000         mov sp #3000
+   2 L 7 27 115          jal rads main
+   3 X 31 0 0 0 20       trap r0 #0
+                        ; fun sieve pv 0
+                        :sieve
+                        ; gnAsg :(#1 2 )
+                        ; gnAsg :(#2 (+ #1 #1 ))
+                        ; gnAsg :((vec a #2 )0 )
+                        ; gnAsg :(#2 (+ #2 #1 ))
+   4 D 4 1 30 1         st r1 @1 fp
+   5 D 4 2 30 2         st r2 @2 fp
+   6 D 4 3 30 3         st r3 @3 fp
+   7 D 4 4 30 4         st r4 @4 fp
+   8 D 4 5 30 5         st r5 @5 fp
+   9 D 10 30 30 6       add fp fp #6
+  10 D 4 27 30 0        st rads @0 fp
+  11 L 5 1 2            mov r1 #2
+  12 L 6 0 29           jmp L102
+                        :L103
+  13 X 31 3 1 1 0       add r3 r1 r1
+  14 X 31 2 3 0 16      mov r2 r3
+  15 L 6 0 20           jmp L104
+                        :L105
+  16 L 5 3 0            mov r3 #0
+  17 D 4 3 2 1101       st r3 @a r2
+  18 X 31 3 2 1 0       add r3 r2 r1
+  19 X 31 2 3 0 16      mov r2 r3
+                        :L104
+  20 L 1 4 1100         ld r4 N
+  21 X 31 3 2 4 10      le r3 r2 r4
+  22 L 8 3 16           jt r3 L105
+  23 D 10 1 1 1         add r1 r1 #1
+  24 L 6 0 26           jmp L106
+                        :L107
+  25 D 10 1 1 1         add r1 r1 #1
+                        :L106
+  26 D 2 3 1 1101       ld r3 @a r1
+  27 D 17 4 3 0         eq r4 r3 #0
+  28 L 8 4 25           jt r4 L107
+                        :L102
+  29 X 31 3 1 1 2       mul r3 r1 r1
+  30 L 1 5 1100         ld r5 N
+  31 X 31 4 3 5 10      le r4 r3 r5
+  32 L 8 4 13           jt r4 L103
+                        :L101
+  33 D 2 27 30 0        ld rads @0 fp
+  34 D 11 30 30 6       sub fp fp #6
+  35 D 2 5 30 5         ld r5 @5 fp
+  36 D 2 4 30 4         ld r4 @4 fp
+  37 D 2 3 30 3         ld r3 @3 fp
+  38 D 2 2 30 2         ld r2 @2 fp
+  39 D 2 1 30 1         ld r1 @1 fp
+  40 X 31 27 0 0 19     ret rads
+                        ; fun show pv 0
+                        :show
+                        ; gnAsg :(#1 0 )
+                        ; gnAsg :(#2 0 )
+                        ; gnAsg :(#3 2 )
+                        ; gnAsg :(#2 #3 )
+  41 D 4 1 30 1         st r1 @1 fp
+  42 D 4 2 30 2         st r2 @2 fp
+  43 D 4 3 30 3         st r3 @3 fp
+  44 D 4 4 30 4         st r4 @4 fp
+  45 D 4 5 30 5         st r5 @5 fp
+  46 D 10 30 30 6       add fp fp #6
+  47 D 4 27 30 0        st rads @0 fp
+  48 L 5 1 0            mov r1 #0
+  49 L 5 2 0            mov r2 #0
+  50 L 5 3 2            mov r3 #2
+  51 L 6 0 60           jmp L109
+                        :L110
+  52 D 2 4 3 1101       ld r4 @a r3
+  53 L 9 4 59           jf r4 L111
+  54 X 31 3 1 0 20      trap r3 #1
+  55 L 5 4 32           mov r4 #32
+  56 X 31 4 2 0 20      trap r4 #2
+  57 X 31 2 3 0 16      mov r2 r3
+  58 D 10 1 1 1         add r1 r1 #1
+                        :L111
+  59 D 10 3 3 1         add r3 r3 #1
+                        :L109
+  60 L 1 5 1100         ld r5 N
+  61 X 31 4 3 5 10      le r4 r3 r5
+  62 L 8 4 52           jt r4 L110
+  63 L 5 4 10           mov r4 #10
+  64 X 31 4 2 0 20      trap r4 #2
+  65 L 5 4 32           mov r4 #32
+  66 X 31 4 2 0 20      trap r4 #2
+  67 L 5 4 112          mov r4 #112
+  68 X 31 4 2 0 20      trap r4 #2
+  69 L 5 4 114          mov r4 #114
+  70 X 31 4 2 0 20      trap r4 #2
+  71 L 5 4 105          mov r4 #105
+  72 X 31 4 2 0 20      trap r4 #2
+  73 L 5 4 109          mov r4 #109
+  74 X 31 4 2 0 20      trap r4 #2
+  75 L 5 4 101          mov r4 #101
+  76 X 31 4 2 0 20      trap r4 #2
+  77 L 5 4 32           mov r4 #32
+  78 X 31 4 2 0 20      trap r4 #2
+  79 L 5 4 102          mov r4 #102
+  80 X 31 4 2 0 20      trap r4 #2
+  81 L 5 4 111          mov r4 #111
+  82 X 31 4 2 0 20      trap r4 #2
+  83 L 5 4 117          mov r4 #117
+  84 X 31 4 2 0 20      trap r4 #2
+  85 L 5 4 110          mov r4 #110
+  86 X 31 4 2 0 20      trap r4 #2
+  87 L 5 4 100          mov r4 #100
+  88 X 31 4 2 0 20      trap r4 #2
+  89 L 5 4 32           mov r4 #32
+  90 X 31 4 2 0 20      trap r4 #2
+  91 X 31 1 1 0 20      trap r1 #1
+  92 L 5 4 32           mov r4 #32
+  93 X 31 4 2 0 20      trap r4 #2
+  94 L 5 4 108          mov r4 #108
+  95 X 31 4 2 0 20      trap r4 #2
+  96 L 5 4 97           mov r4 #97
+  97 X 31 4 2 0 20      trap r4 #2
+  98 L 5 4 115          mov r4 #115
+  99 X 31 4 2 0 20      trap r4 #2
+ 100 L 5 4 116          mov r4 #116
+ 101 X 31 4 2 0 20      trap r4 #2
+ 102 L 5 4 32           mov r4 #32
+ 103 X 31 4 2 0 20      trap r4 #2
+ 104 X 31 2 1 0 20      trap r2 #1
+ 105 L 5 4 10           mov r4 #10
+ 106 X 31 4 2 0 20      trap r4 #2
+                        :L108
+ 107 D 2 27 30 0        ld rads @0 fp
+ 108 D 11 30 30 6       sub fp fp #6
+ 109 D 2 5 30 5         ld r5 @5 fp
+ 110 D 2 4 30 4         ld r4 @4 fp
+ 111 D 2 3 30 3         ld r3 @3 fp
+ 112 D 2 2 30 2         ld r2 @2 fp
+ 113 D 2 1 30 1         ld r1 @1 fp
+ 114 X 31 27 0 0 19     ret rads
+                        ; fun main pv 0
+                        :main
+                        ; gnAsg :(N 100 )
+                        ; gnAsg :((vec a 1 )0 )
+                        ; gnAsg :(#1 2 )
+                        ; gnAsg :((vec a #1 )1 )
+ 115 D 4 1 30 1         st r1 @1 fp
+ 116 D 4 2 30 2         st r2 @2 fp
+ 117 D 4 3 30 3         st r3 @3 fp
+ 118 D 10 30 30 4       add fp fp #4
+ 119 D 4 27 30 0        st rads @0 fp
+ 120 L 5 2 100          mov r2 #100
+ 121 L 3 2 1100         st r2 N
+ 122 L 5 2 0            mov r2 #0
+ 123 L 5 3 1            mov r3 #1
+ 124 D 4 2 3 1101       st r2 @a r3
+ 125 L 5 1 2            mov r1 #2
+ 126 L 6 0 130          jmp L113
+                        :L114
+ 127 L 5 2 1            mov r2 #1
+ 128 D 4 2 1 1101       st r2 @a r1
+ 129 D 10 1 1 1         add r1 r1 #1
+                        :L113
+ 130 L 1 3 1100         ld r3 N
+ 131 X 31 2 1 3 10      le r2 r1 r3
+ 132 L 8 2 127          jt r2 L114
+ 133 L 7 27 4           jal rads sieve
+ 134 L 7 27 41          jal rads show
+                        :L112
+ 135 D 2 27 30 0        ld rads @0 fp
+ 136 D 11 30 30 4       sub fp fp #4
+ 137 D 2 3 30 3         ld r3 @3 fp
+ 138 D 2 2 30 2         ld r2 @2 fp
+ 139 D 2 1 30 1         ld r1 @1 fp
+ 140 X 31 27 0 0 19     ret rads
+                        .data 200
+                        .end

@@ -21,9 +21,14 @@ char ibuf[MXBUF], *cp = NULL;		// input buffer
 FILE *fi, *fo;
 int display;
 
-void xstrup(char *string) {
-  for(; *string; string++)
-    *string = toupper((unsigned char) *string);
+static char *strupr(char s[])
+{
+  char *p;
+
+  for (p = s; *p; ++p)
+    *p = toupper(*p);
+
+  return(s);
 }
 
 PRIVATE char *tok(void){	// get one token from input
@@ -33,7 +38,7 @@ PRIVATE char *tok(void){	// get one token from input
 		cp = fgets(ibuf,MXBUF,fi);
 		if( cp != NULL ) cp = strtok(ibuf, sep);
 	}
-	xstrup(cp);   // convert to uppercase
+	cp = strupr(cp);   // convert to uppercase
 	return cp;
 }
 

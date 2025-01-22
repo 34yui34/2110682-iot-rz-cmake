@@ -1,0 +1,51 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun interrupt pv 0
+:interrupt
+add fp fp #1
+st rads @0 fp
+trap r1 #2
+add r1 r1 #1
+:L102
+ld rads @0 fp
+sub fp fp #1
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(#1 32 )
+; gnAsg :(#1 #1 )
+st r1 @1 fp
+st r2 @2 fp
+add fp fp #3
+st rads @0 fp
+mov r1 #interrupt
+st r1 1000
+mov r1 #1
+trap r1 #12 ; enable int
+mov r1 #10
+trap r1 #10 ; set timer1 = 100
+mov r1 #100
+trap r1 #11  ; set div = 100
+mov r1 #32
+jmp L104
+:L105
+mov r1 r1
+:L104
+lt r2 r1 #50
+jt r2 L105
+:L103
+ld rads @0 fp
+sub fp fp #3
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

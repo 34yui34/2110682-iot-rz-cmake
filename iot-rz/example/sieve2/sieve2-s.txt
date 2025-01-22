@@ -1,0 +1,183 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ N 1100
+ a 1101
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun sieve pv 0
+:sieve
+; gnAsg :(#1 2 )
+; gnAsg :(#2 (+ #1 #1 ))
+; gnAsg :((vec a #2 )0 )
+; gnAsg :(#2 (+ #2 #1 ))
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+add fp fp #6
+st rads @0 fp
+mov r1 #2
+jmp L102
+:L103
+add r3 r1 r1
+mov r2 r3
+jmp L104
+:L105
+mov r3 #0
+st r3 @a r2
+add r3 r2 r1
+mov r2 r3
+:L104
+ld r4 N
+le r3 r2 r4
+jt r3 L105
+add r1 r1 #1
+jmp L106
+:L107
+add r1 r1 #1
+:L106
+ld r3 @a r1
+eq r4 r3 #0
+jt r4 L107
+:L102
+mul r3 r1 r1
+ld r5 N
+le r4 r3 r5
+jt r4 L103
+:L101
+ld rads @0 fp
+sub fp fp #6
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun show pv 0
+:show
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :(#3 2 )
+; gnAsg :(#2 #3 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+add fp fp #6
+st rads @0 fp
+mov r1 #0
+mov r2 #0
+mov r3 #2
+jmp L109
+:L110
+ld r4 @a r3
+jf r4 L111
+trap r3 #1
+mov r4 #32
+trap r4 #2
+mov r2 r3
+add r1 r1 #1
+:L111
+add r3 r3 #1
+:L109
+ld r5 N
+le r4 r3 r5
+jt r4 L110
+mov r4 #10
+trap r4 #2
+mov r4 #32
+trap r4 #2
+mov r4 #112
+trap r4 #2
+mov r4 #114
+trap r4 #2
+mov r4 #105
+trap r4 #2
+mov r4 #109
+trap r4 #2
+mov r4 #101
+trap r4 #2
+mov r4 #32
+trap r4 #2
+mov r4 #102
+trap r4 #2
+mov r4 #111
+trap r4 #2
+mov r4 #117
+trap r4 #2
+mov r4 #110
+trap r4 #2
+mov r4 #100
+trap r4 #2
+mov r4 #32
+trap r4 #2
+trap r1 #1
+mov r4 #32
+trap r4 #2
+mov r4 #108
+trap r4 #2
+mov r4 #97
+trap r4 #2
+mov r4 #115
+trap r4 #2
+mov r4 #116
+trap r4 #2
+mov r4 #32
+trap r4 #2
+trap r2 #1
+mov r4 #10
+trap r4 #2
+:L108
+ld rads @0 fp
+sub fp fp #6
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(N 100 )
+; gnAsg :((vec a 1 )0 )
+; gnAsg :(#1 2 )
+; gnAsg :((vec a #1 )1 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+add fp fp #4
+st rads @0 fp
+mov r2 #100
+st r2 N
+mov r2 #0
+mov r3 #1
+st r2 @a r3
+mov r1 #2
+jmp L113
+:L114
+mov r2 #1
+st r2 @a r1
+add r1 r1 #1
+:L113
+ld r3 N
+le r2 r1 r3
+jt r2 L114
+jal rads sieve
+jal rads show
+:L112
+ld rads @0 fp
+sub fp fp #4
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

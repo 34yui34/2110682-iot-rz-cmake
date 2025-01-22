@@ -1,0 +1,104 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ xaxis 1100
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun int0 pv 0
+:int0
+; gnAsg :(#1 (call readport 13 ))
+st r1 @1 fp
+st r2 @2 fp
+add fp fp #3
+st rads @0 fp
+mov r2 #13
+trap r2 #18
+mov r1 r28
+push sp r1
+mov r2 #0
+push sp r2
+mov r2 #14
+trap r2 #19
+:L108
+ld rads @0 fp
+sub fp fp #3
+ld r2 @2 fp
+ld r1 @1 fp
+reti
+; fun int1 pv 0
+:int1
+; gnAsg :(#1 (/ (call readport 10 )2 ))
+; gnAsg :(xaxis (+ xaxis 2 ))
+; gnAsg :(xaxis 10 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+add fp fp #4
+st rads @0 fp
+mov r2 #10
+trap r2 #18
+div r2 r28 #2
+mov r1 r2
+ld r2 xaxis
+push sp r2
+mov r2 #100
+sub r3 r2 r1
+push sp r3
+mov r2 #15
+trap r2 #19
+ld r2 xaxis
+add r3 r2 #2
+st r3 xaxis
+ld r2 xaxis
+gt r3 r2 #300
+jf r3 L110
+mov r2 #10
+st r2 xaxis
+:L110
+:L109
+ld rads @0 fp
+sub fp fp #4
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+reti
+; fun main pv 0
+:main
+; gnAsg :(xaxis 10 )
+st r1 @1 fp
+add fp fp #2
+st rads @0 fp
+mov r1 #int0
+st r1 1000
+mov r1 #int1
+st r1 1001
+mov r1 #int2
+st r1 1002
+mov r1 #int3
+st r1 1003
+mov r1 #200
+trap r1 #13
+mov r1 #100
+trap r1 #14
+mov r1 #1
+trap r1 #16
+mov r1 #10
+st r1 xaxis
+jmp L114
+:L115
+swi
+:L114
+mov r1 #1
+jt r1 L115
+:L113
+ld rads @0 fp
+sub fp fp #2
+ld r1 @1 fp
+ret rads
+.data 200
+.end

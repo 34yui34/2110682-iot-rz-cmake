@@ -1,0 +1,103 @@
+                        .symbol
+                         fp 30
+                         sp 29
+                         retval 28
+                         rads 27
+                         ecount 1100
+                         flagstart 1101
+                         lastx 1102
+                         cnt1 1103
+                         cnt2 1104
+                        .code 0
+   0 L 5 30 3500         mov fp #3500
+   1 L 5 29 3000         mov sp #3000
+   2 L 7 27 37           jal rads main
+   3 X 31 0 0 0 20       trap r0 #0
+                        ; fun int1 pv 0
+                        :int1
+                        ; gnAsg :(flagstart 1 )
+                        ; gnAsg :(cnt1 ecount )
+                        ; gnAsg :(flagstart 0 )
+                        ; gnAsg :(cnt2 ecount )
+   4 L 1 1 1101         ld r1 flagstart
+   5 D 17 2 1 0         eq r2 r1 #0
+   6 L 9 2 12           jf r2 L102
+   7 L 5 1 1            mov r1 #1
+   8 L 3 1 1101         st r1 flagstart
+   9 L 1 1 1100         ld r1 ecount
+  10 L 3 1 1103         st r1 cnt1
+  11 L 6 0 20           jmp L103
+                        :L102
+  12 L 5 1 0            mov r1 #0
+  13 L 3 1 1101         st r1 flagstart
+  14 L 1 1 1100         ld r1 ecount
+  15 L 3 1 1104         st r1 cnt2
+  16 L 1 1 1104         ld r1 cnt2
+  17 L 1 3 1103         ld r3 cnt1
+  18 X 31 2 1 3 1       sub r2 r1 r3
+  19 X 31 2 1 0 20      trap r2 #1
+                        :L103
+                        :L101
+  20 X 31 0 0 0 25      reti
+                        ; fun int0 pv 0
+                        :int0
+                        ; gnAsg :(#1 (call readport 11 ))
+                        ; gnAsg :(ecount (+ ecount 1 ))
+                        ; gnAsg :(lastx #1 )
+  21 L 5 2 11           mov r2 #11
+  22 X 31 2 18 0 20     trap r2 #18
+  23 X 31 1 28 0 16     mov r1 r28
+  24 X 31 1 1 0 20      trap r1 #1
+  25 L 1 2 1100         ld r2 ecount
+  26 X 31 2 1 0 20      trap r2 #1
+  27 L 1 2 1102         ld r2 lastx
+  28 X 31 3 2 1 8       ne r3 r2 r1
+  29 L 9 3 35           jf r3 L105
+  30 D 18 2 1 0         ne r2 r1 #0
+  31 L 9 2 35           jf r2 L106
+  32 L 1 2 1100         ld r2 ecount
+  33 D 10 3 2 1         add r3 r2 #1
+  34 L 3 3 1100         st r3 ecount
+                        :L106
+                        :L105
+  35 L 3 1 1102         st r1 lastx
+                        :L104
+  36 X 31 0 0 0 25      reti
+                        ; fun main pv 0
+                        :main
+                        ; gnAsg :(flagstart 0 )
+                        ; gnAsg :(ecount 0 )
+                        ; gnAsg :(lastx (call readport 11 ))
+  37 D 4 1 30 1         st r1 @1 fp
+  38 D 10 30 30 2       add fp fp #2
+  39 D 4 27 30 0        st rads @0 fp
+  40 L 5 1 21           mov r1 #int0
+  41 L 3 1 1000         st r1 1000
+  42 L 5 1 4            mov r1 #int1
+  43 L 3 1 1001         st r1 1001
+  44 L 5 1 200          mov r1 #200
+  45 X 31 1 13 0 20     trap r1 #13
+  46 L 5 1 4000         mov r1 #4000
+  47 X 31 1 14 0 20     trap r1 #14
+  48 L 5 1 1            mov r1 #1
+  49 X 31 1 16 0 20     trap r1 #16
+  50 L 5 1 0            mov r1 #0
+  51 L 3 1 1101         st r1 flagstart
+  52 L 5 1 0            mov r1 #0
+  53 L 3 1 1100         st r1 ecount
+  54 L 5 1 11           mov r1 #11
+  55 X 31 1 18 0 20     trap r1 #18
+  56 L 3 28 1102        st r28 lastx
+  57 L 6 0 59           jmp L108
+                        :L109
+  58 X 31 0 0 0 29      swi
+                        :L108
+  59 L 5 1 1            mov r1 #1
+  60 L 8 1 58           jt r1 L109
+                        :L107
+  61 D 2 27 30 0        ld rads @0 fp
+  62 D 11 30 30 2       sub fp fp #2
+  63 D 2 1 30 1         ld r1 @1 fp
+  64 X 31 27 0 0 19     ret rads
+                        .data 200
+                        .end

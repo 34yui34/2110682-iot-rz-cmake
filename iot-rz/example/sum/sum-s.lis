@@ -1,0 +1,77 @@
+                        .symbol
+                         fp 30
+                         sp 29
+                         retval 28
+                         rads 27
+                         ax 1100
+                        .code 0
+   0 L 5 30 3500         mov fp #3500
+   1 L 5 29 3000         mov sp #3000
+   2 L 7 27 28           jal rads main
+   3 X 31 0 0 0 20       trap r0 #0
+                        ; fun sum pv 0
+                        :sum
+                        ; gnAsg :(#1 0 )
+                        ; gnAsg :(#2 0 )
+                        ; gnAsg :(#2 (+ #2 (vec ax #1 )))
+   4 D 4 1 30 1         st r1 @1 fp
+   5 D 4 2 30 2         st r2 @2 fp
+   6 D 4 3 30 3         st r3 @3 fp
+   7 D 4 4 30 4         st r4 @4 fp
+   8 D 10 30 30 5       add fp fp #5
+   9 D 4 27 30 0        st rads @0 fp
+  10 L 5 1 0            mov r1 #0
+  11 L 5 2 0            mov r2 #0
+  12 L 6 0 17           jmp L102
+                        :L103
+  13 D 2 4 1 1100       ld r4 @ax r1
+  14 X 31 3 2 4 0       add r3 r2 r4
+  15 X 31 2 3 0 16      mov r2 r3
+  16 D 10 1 1 1         add r1 r1 #1
+                        :L102
+  17 D 19 3 1 4         lt r3 r1 #4
+  18 L 8 3 13           jt r3 L103
+  19 X 31 28 2 0 16     mov retval r2
+  20 L 6 0 21           jmp L101
+                        :L101
+  21 D 2 27 30 0        ld rads @0 fp
+  22 D 11 30 30 5       sub fp fp #5
+  23 D 2 4 30 4         ld r4 @4 fp
+  24 D 2 3 30 3         ld r3 @3 fp
+  25 D 2 2 30 2         ld r2 @2 fp
+  26 D 2 1 30 1         ld r1 @1 fp
+  27 X 31 27 0 0 19     ret rads
+                        ; fun main pv 0
+                        :main
+                        ; gnAsg :((vec ax 0 )11 )
+                        ; gnAsg :((vec ax 1 )22 )
+                        ; gnAsg :((vec ax 2 )33 )
+                        ; gnAsg :((vec ax 3 )44 )
+  28 D 4 1 30 1         st r1 @1 fp
+  29 D 4 2 30 2         st r2 @2 fp
+  30 D 10 30 30 3       add fp fp #3
+  31 D 4 27 30 0        st rads @0 fp
+  32 L 5 1 11           mov r1 #11
+  33 L 5 2 0            mov r2 #0
+  34 D 4 1 2 1100       st r1 @ax r2
+  35 L 5 1 22           mov r1 #22
+  36 L 5 2 1            mov r2 #1
+  37 D 4 1 2 1100       st r1 @ax r2
+  38 L 5 1 33           mov r1 #33
+  39 L 5 2 2            mov r2 #2
+  40 D 4 1 2 1100       st r1 @ax r2
+  41 L 5 1 44           mov r1 #44
+  42 L 5 2 3            mov r2 #3
+  43 D 4 1 2 1100       st r1 @ax r2
+  44 L 7 27 4           jal rads sum
+  45 X 31 28 1 0 20     trap r28 #1
+  46 L 5 1 10           mov r1 #10
+  47 X 31 1 2 0 20      trap r1 #2
+                        :L104
+  48 D 2 27 30 0        ld rads @0 fp
+  49 D 11 30 30 3       sub fp fp #3
+  50 D 2 2 30 2         ld r2 @2 fp
+  51 D 2 1 30 1         ld r1 @1 fp
+  52 X 31 27 0 0 19     ret rads
+                        .data 200
+                        .end

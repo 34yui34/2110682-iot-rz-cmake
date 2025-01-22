@@ -1,0 +1,103 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun atoi pv 1
+:atoi
+; gnAsg :(#2 0 )
+; gnAsg :(#3 0 )
+; gnAsg :(#4 (vec #1 #3 ))
+; gnAsg :(#2 (+ (* #2 10 )(- #4 48 )))
+; gnAsg :(#4 (vec #1 #3 ))
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+st r6 @6 fp
+st r7 @7 fp
+add fp fp #8
+st rads @0 fp
+pop sp r1
+mov r2 #0
+mov r3 #0
+ld r5 +r1 r3
+mov r4 r5
+jmp L102
+:L103
+mul r5 r2 #10
+sub r7 r4 #48
+add r6 r5 r7
+mov r2 r6
+add r3 r3 #1
+ld r5 +r1 r3
+mov r4 r5
+:L102
+ne r5 r4 #0
+jt r5 L103
+mov retval r2
+jmp L101
+:L101
+ld rads @0 fp
+sub fp fp #8
+ld r7 @7 fp
+ld r6 @6 fp
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(#1 (call input ))
+; gnAsg :(#2 0 )
+; gnAsg :(#3 (vec #1 #2 ))
+; gnAsg :(#3 (vec #1 #2 ))
+; gnAsg :(#4 (call atoi #1 ))
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+add fp fp #6
+st rads @0 fp
+mov r5 #0
+trap r5 #15
+trap r0 #4
+mov r1 r28
+mov r2 #0
+ld r5 +r1 r2
+mov r3 r5
+jmp L105
+:L106
+trap r3 #2
+mov r5 #32
+trap r5 #2
+add r2 r2 #1
+ld r5 +r1 r2
+mov r3 r5
+:L105
+ne r5 r3 #0
+jt r5 L106
+push sp r1
+jal rads atoi
+mov r4 r28
+trap r4 #1
+:L104
+ld rads @0 fp
+sub fp fp #6
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

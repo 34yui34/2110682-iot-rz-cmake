@@ -1,0 +1,137 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ N 1100
+ val 1101
+ id 1105
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun writeperm pv 0
+:writeperm
+; gnAsg :(#1 0 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+add fp fp #4
+st rads @0 fp
+mov r1 #0
+jmp L102
+:L103
+ld r2 @val r1
+trap r2 #1
+mov r2 #32
+trap r2 #2
+add r1 r1 #1
+:L102
+ld r3 N
+lt r2 r1 r3
+jt r2 L103
+mov r2 #10
+trap r2 #2
+:L101
+ld rads @0 fp
+sub fp fp #4
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun visit pv 1
+:visit
+; gnAsg :(id (+ id 1 ))
+; gnAsg :((vec val #1 )id )
+; gnAsg :(#2 0 )
+; gnAsg :(id (- id 1 ))
+; gnAsg :((vec val #1 )0 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+st r6 @6 fp
+add fp fp #7
+st rads @0 fp
+pop sp r1
+ld r3 id
+add r4 r3 #1
+st r4 id
+ld r3 id
+st r3 @val r1
+ld r3 id
+ld r5 N
+sub r6 r5 #1
+eq r4 r3 r6
+jf r4 L105
+jal rads writeperm
+:L105
+mov r2 #0
+jmp L106
+:L107
+ld r3 @val r2
+eq r4 r3 #0
+jf r4 L108
+push sp r2
+jal rads visit
+:L108
+add r2 r2 #1
+:L106
+ld r4 N
+lt r3 r2 r4
+jt r3 L107
+ld r3 id
+sub r4 r3 #1
+st r4 id
+mov r3 #0
+st r3 @val r1
+:L104
+ld rads @0 fp
+sub fp fp #7
+ld r6 @6 fp
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(N 4 )
+; gnAsg :(#1 0 )
+; gnAsg :((vec val #1 )0 )
+; gnAsg :(id (- 0 1 ))
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+add fp fp #4
+st rads @0 fp
+mov r2 #4
+st r2 N
+mov r1 #0
+jmp L110
+:L111
+mov r2 #0
+st r2 @val r1
+add r1 r1 #1
+:L110
+ld r3 N
+lt r2 r1 r3
+jt r2 L111
+mov r2 #0
+sub r3 r2 #1
+st r3 id
+mov r2 #0
+push sp r2
+jal rads visit
+:L109
+ld rads @0 fp
+sub fp fp #4
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

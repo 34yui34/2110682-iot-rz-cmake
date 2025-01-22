@@ -1,0 +1,54 @@
+                        .symbol
+                         fp 30
+                         sp 29
+                         retval 28
+                         rads 27
+                        .code 0
+   0 L 5 30 3500         mov fp #3500
+   1 L 5 29 3000         mov sp #3000
+   2 L 7 27 27           jal rads main
+   3 X 31 0 0 0 20       trap r0 #0
+                        ; fun fac pv 1
+                        :fac
+   4 D 4 1 30 1         st r1 @1 fp
+   5 D 4 2 30 2         st r2 @2 fp
+   6 D 4 3 30 3         st r3 @3 fp
+   7 D 10 30 30 4       add fp fp #4
+   8 D 4 27 30 0        st rads @0 fp
+   9 X 31 29 1 0 22     pop sp r1
+  10 D 17 2 1 0         eq r2 r1 #0
+  11 L 9 2 15           jf r2 L102
+  12 L 5 28 1           mov retval #1
+  13 L 6 0 21           jmp L101
+  14 L 6 0 21           jmp L103
+                        :L102
+  15 D 11 3 1 1         sub r3 r1 #1
+  16 X 31 29 3 0 21     push sp r3
+  17 L 7 27 4           jal rads fac
+  18 X 31 2 1 28 2      mul r2 r1 r28
+  19 X 31 28 2 0 16     mov retval r2
+  20 L 6 0 21           jmp L101
+                        :L103
+                        :L101
+  21 D 2 27 30 0        ld rads @0 fp
+  22 D 11 30 30 4       sub fp fp #4
+  23 D 2 3 30 3         ld r3 @3 fp
+  24 D 2 2 30 2         ld r2 @2 fp
+  25 D 2 1 30 1         ld r1 @1 fp
+  26 X 31 27 0 0 19     ret rads
+                        ; fun main pv 0
+                        :main
+  27 D 4 1 30 1         st r1 @1 fp
+  28 D 10 30 30 2       add fp fp #2
+  29 D 4 27 30 0        st rads @0 fp
+  30 L 5 1 6            mov r1 #6
+  31 X 31 29 1 0 21     push sp r1
+  32 L 7 27 4           jal rads fac
+  33 X 31 28 1 0 20     trap r28 #1
+                        :L104
+  34 D 2 27 30 0        ld rads @0 fp
+  35 D 11 30 30 2       sub fp fp #2
+  36 D 2 1 30 1         ld r1 @1 fp
+  37 X 31 27 0 0 19     ret rads
+                        .data 200
+                        .end

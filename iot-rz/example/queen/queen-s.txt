@@ -1,0 +1,256 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ Q 1100
+ Z 1101
+ D 1102
+ soln 1103
+ col 1104
+ d45 1113
+ d135 1129
+ queen 1145
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun printboard pv 0
+:printboard
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :(#1 0 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+add fp fp #5
+st rads @0 fp
+mov r1 #0
+jmp L102
+:L103
+mov r2 #0
+jmp L104
+:L105
+ld r4 @queen r1
+eq r3 r2 r4
+jf r3 L106
+mov r3 #81
+trap r3 #2
+jmp L107
+:L106
+mov r3 #45
+trap r3 #2
+:L107
+add r2 r2 #1
+:L104
+ld r4 Q
+lt r3 r2 r4
+jt r3 L105
+mov r3 #10
+trap r3 #2
+add r1 r1 #1
+:L102
+ld r4 Q
+lt r3 r1 r4
+jt r3 L103
+mov r1 #0
+jmp L108
+:L109
+ld r3 @queen r1
+trap r3 #1
+mov r3 #32
+trap r3 #2
+add r1 r1 #1
+:L108
+ld r4 Q
+lt r3 r1 r4
+jt r3 L109
+mov r3 #10
+trap r3 #2
+:L101
+ld rads @0 fp
+sub fp fp #5
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun find pv 1
+:find
+; gnAsg :(soln (+ soln 1 ))
+; gnAsg :(#2 0 )
+; gnAsg :((vec queen #1 )#2 )
+; gnAsg :((vec col #2 )#1 )
+; gnAsg :((vec d45 (+ #1 #2 ))#1 )
+; gnAsg :((vec d135 (- (- (+ #1 Q )1 )#2 ))#1 )
+; gnAsg :((vec col #2 )Z )
+; gnAsg :((vec d45 (+ #1 #2 ))Z )
+; gnAsg :((vec d135 (- (- (+ #1 Q )1 )#2 ))Z )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+st r6 @6 fp
+add fp fp #7
+st rads @0 fp
+pop sp r1
+ld r4 Q
+eq r3 r1 r4
+jf r3 L111
+ld r3 soln
+add r4 r3 #1
+st r4 soln
+jmp L112
+:L111
+mov r2 #0
+jmp L113
+:L114
+ld r5 @col r2
+ge r6 r5 r1
+ne r4 r6 r0
+jf r4 L115
+add r6 r1 r2
+ld r5 @d45 r6
+ge r6 r5 r1
+ne r4 r6 r0
+:L115
+ne r3 r4 r0
+jf r3 L116
+ld r6 Q
+add r5 r1 r6
+sub r6 r5 #1
+sub r5 r6 r2
+ld r4 @d135 r5
+ge r5 r4 r1
+ne r3 r5 r0
+:L116
+jf r3 L117
+st r2 @queen r1
+st r1 @col r2
+add r3 r1 r2
+st r1 @d45 r3
+ld r4 Q
+add r3 r1 r4
+sub r4 r3 #1
+sub r3 r4 r2
+st r1 @d135 r3
+add r3 r1 #1
+push sp r3
+jal rads find
+ld r3 Z
+st r3 @col r2
+ld r3 Z
+add r4 r1 r2
+st r3 @d45 r4
+ld r3 Z
+ld r5 Q
+add r4 r1 r5
+sub r5 r4 #1
+sub r4 r5 r2
+st r3 @d135 r4
+:L117
+add r2 r2 #1
+:L113
+ld r4 Q
+lt r3 r2 r4
+jt r3 L114
+:L112
+:L110
+ld rads @0 fp
+sub fp fp #7
+ld r6 @6 fp
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(Q 8 )
+; gnAsg :(D 15 )
+; gnAsg :(Z 9 )
+; gnAsg :(#1 0 )
+; gnAsg :((vec col #1 )Z )
+; gnAsg :(#1 0 )
+; gnAsg :((vec d45 #1 )Z )
+; gnAsg :((vec d135 #1 )Z )
+; gnAsg :(soln 0 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+add fp fp #4
+st rads @0 fp
+mov r2 #8
+st r2 Q
+mov r2 #15
+st r2 D
+mov r2 #9
+st r2 Z
+mov r1 #0
+jmp L119
+:L120
+ld r2 Z
+st r2 @col r1
+add r1 r1 #1
+:L119
+ld r3 Q
+lt r2 r1 r3
+jt r2 L120
+mov r1 #0
+jmp L121
+:L122
+ld r2 Z
+st r2 @d45 r1
+ld r2 Z
+st r2 @d135 r1
+add r1 r1 #1
+:L121
+ld r3 D
+lt r2 r1 r3
+jt r2 L122
+mov r2 #0
+st r2 soln
+mov r2 #0
+push sp r2
+jal rads find
+mov r2 #110
+trap r2 #2
+mov r2 #117
+trap r2 #2
+mov r2 #109
+trap r2 #2
+mov r2 #32
+trap r2 #2
+mov r2 #111
+trap r2 #2
+mov r2 #102
+trap r2 #2
+mov r2 #32
+trap r2 #2
+mov r2 #115
+trap r2 #2
+mov r2 #111
+trap r2 #2
+mov r2 #108
+trap r2 #2
+mov r2 #110
+trap r2 #2
+mov r2 #32
+trap r2 #2
+ld r2 soln
+trap r2 #1
+mov r2 #10
+trap r2 #2
+:L118
+ld rads @0 fp
+sub fp fp #4
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

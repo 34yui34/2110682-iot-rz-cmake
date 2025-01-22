@@ -1,0 +1,77 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ ax 1100
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun sum pv 0
+:sum
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :(#2 (+ #2 (vec ax #1 )))
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+add fp fp #5
+st rads @0 fp
+mov r1 #0
+mov r2 #0
+jmp L102
+:L103
+ld r4 @ax r1
+add r3 r2 r4
+mov r2 r3
+add r1 r1 #1
+:L102
+lt r3 r1 #4
+jt r3 L103
+mov retval r2
+jmp L101
+:L101
+ld rads @0 fp
+sub fp fp #5
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :((vec ax 0 )11 )
+; gnAsg :((vec ax 1 )22 )
+; gnAsg :((vec ax 2 )33 )
+; gnAsg :((vec ax 3 )44 )
+st r1 @1 fp
+st r2 @2 fp
+add fp fp #3
+st rads @0 fp
+mov r1 #11
+mov r2 #0
+st r1 @ax r2
+mov r1 #22
+mov r2 #1
+st r1 @ax r2
+mov r1 #33
+mov r2 #2
+st r1 @ax r2
+mov r1 #44
+mov r2 #3
+st r1 @ax r2
+jal rads sum
+trap r28 #1
+mov r1 #10
+trap r1 #2
+:L104
+ld rads @0 fp
+sub fp fp #3
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

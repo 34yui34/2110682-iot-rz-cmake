@@ -1,0 +1,230 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+ N 1100
+ a 1101
+ b 1117
+ c 1133
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun inita pv 0
+:inita
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :((vec a (+ (* #1 N )#2 ))#1 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+add fp fp #5
+st rads @0 fp
+mov r1 #0
+jmp L102
+:L103
+mov r2 #0
+jmp L104
+:L105
+ld r4 N
+mul r3 r1 r4
+add r4 r3 r2
+st r1 @a r4
+add r2 r2 #1
+:L104
+ld r4 N
+lt r3 r2 r4
+jt r3 L105
+add r1 r1 #1
+:L102
+ld r4 N
+lt r3 r1 r4
+jt r3 L103
+:L101
+ld rads @0 fp
+sub fp fp #5
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun initb pv 0
+:initb
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :((vec b (+ (* #1 N )#2 ))#2 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+add fp fp #5
+st rads @0 fp
+mov r1 #0
+jmp L107
+:L108
+mov r2 #0
+jmp L109
+:L110
+ld r4 N
+mul r3 r1 r4
+add r4 r3 r2
+st r2 @b r4
+add r2 r2 #1
+:L109
+ld r4 N
+lt r3 r2 r4
+jt r3 L110
+add r1 r1 #1
+:L107
+ld r4 N
+lt r3 r1 r4
+jt r3 L108
+:L106
+ld rads @0 fp
+sub fp fp #5
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun matmul pv 0
+:matmul
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+; gnAsg :(#3 0 )
+; gnAsg :(#4 0 )
+; gnAsg :(#3 (+ #3 (* (vec a (+ (* #1 N )#4 ))(vec b (+ (* #4 N )#2 )))))
+; gnAsg :((vec c (+ (* #1 N )#2 ))#3 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+st r6 @6 fp
+st r7 @7 fp
+st r8 @8 fp
+st r9 @9 fp
+st r10 @10 fp
+add fp fp #11
+st rads @0 fp
+mov r1 #0
+jmp L112
+:L113
+mov r2 #0
+jmp L114
+:L115
+mov r3 #0
+mov r4 #0
+jmp L116
+:L117
+ld r8 N
+mul r7 r1 r8
+add r8 r7 r4
+ld r6 @a r8
+ld r10 N
+mul r9 r4 r10
+add r10 r9 r2
+ld r8 @b r10
+mul r7 r6 r8
+add r5 r3 r7
+mov r3 r5
+add r4 r4 #1
+:L116
+ld r6 N
+lt r5 r4 r6
+jt r5 L117
+ld r6 N
+mul r5 r1 r6
+add r6 r5 r2
+st r3 @c r6
+add r2 r2 #1
+:L114
+ld r6 N
+lt r5 r2 r6
+jt r5 L115
+add r1 r1 #1
+:L112
+ld r6 N
+lt r5 r1 r6
+jt r5 L113
+:L111
+ld rads @0 fp
+sub fp fp #11
+ld r10 @10 fp
+ld r9 @9 fp
+ld r8 @8 fp
+ld r7 @7 fp
+ld r6 @6 fp
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun show pv 0
+:show
+; gnAsg :(#1 0 )
+; gnAsg :(#2 0 )
+st r1 @1 fp
+st r2 @2 fp
+st r3 @3 fp
+st r4 @4 fp
+st r5 @5 fp
+add fp fp #6
+st rads @0 fp
+mov r1 #0
+jmp L119
+:L120
+mov r2 #0
+jmp L121
+:L122
+ld r5 N
+mul r4 r1 r5
+add r5 r4 r2
+ld r3 @c r5
+trap r3 #1
+mov r3 #32
+trap r3 #2
+add r2 r2 #1
+:L121
+ld r4 N
+lt r3 r2 r4
+jt r3 L122
+mov r3 #10
+trap r3 #2
+add r1 r1 #1
+:L119
+ld r4 N
+lt r3 r1 r4
+jt r3 L120
+:L118
+ld rads @0 fp
+sub fp fp #6
+ld r5 @5 fp
+ld r4 @4 fp
+ld r3 @3 fp
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(N 4 )
+st r1 @1 fp
+add fp fp #2
+st rads @0 fp
+mov r1 #4
+st r1 N
+jal rads inita
+jal rads initb
+jal rads matmul
+jal rads show
+:L123
+ld rads @0 fp
+sub fp fp #2
+ld r1 @1 fp
+ret rads
+.data 200
+.end
