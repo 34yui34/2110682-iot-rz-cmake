@@ -147,6 +147,7 @@ int main( int argc, char *argv[] ){
 //	FO = stdout;
 //  dumpSymTab();
 	epilog();
+	free(fname);
 	return 0;
 }
 
