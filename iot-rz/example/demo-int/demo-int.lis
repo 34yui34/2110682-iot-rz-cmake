@@ -1,0 +1,28 @@
+                        
+                        ;  demo interrupt on s21
+                        ;      increment count by interrupt service routine
+                        
+                        .symbol
+                          cnt   100      ; global counter
+                        
+                        .code 0
+                        :main
+   0 L 5 1 8              mov r1 #isr
+   1 L 3 1 1000           st r1 1000     ; set int vector at M[1000]
+   2 L 5 1 200            mov r1 #200
+   3 X 31 1 13 0 20       trap r1 #13    ; set timer0 200
+   4 L 5 1 0              mov r1 #0
+   5 L 3 1 100            st r1 cnt      ; global cnt
+                        :while
+   6 X 31 0 0 0 29        swi   	 ; sleep and wait for int 
+   7 L 6 0 6              jmp while
+                        
+                        :isr             ; int service routine
+   8 L 1 1 100            ld r1 cnt
+   9 D 10 1 1 1           add r1 r1 #1
+  10 L 3 1 100            st r1 cnt
+  11 X 31 1 1 0 20        trap r1 #1     ; print cnt
+  12 X 31 0 0 0 25        reti
+                        
+                        .data 100
+                        .end

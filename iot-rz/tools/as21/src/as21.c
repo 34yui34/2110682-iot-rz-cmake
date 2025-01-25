@@ -53,7 +53,7 @@ char 	ibuf[MXBUF], *cp = NULL;   	// input buffer, ch ptr
 char	ob[MXBUF];					// output buffer
 char	cbuf[MXBUF];				// output buffer for listing
 
-static 	char sep[] = " \t\n";      	// separator char
+static 	char sep[] = " \r\t\n";      	// separator char
 char    *w;							// current input word
 int 	lineno,loc;		   			// line num, current ads
 FILE 	*fi, *fo, *fl;

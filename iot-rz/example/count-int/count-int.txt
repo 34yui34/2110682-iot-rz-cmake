@@ -1,4 +1,3 @@
-
 .symbol
   cnt 100
 

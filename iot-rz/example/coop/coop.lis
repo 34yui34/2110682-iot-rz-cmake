@@ -1,0 +1,68 @@
+                        
+                        ;  cooperative process
+                        ;     demo  two co-operative processes
+                        
+                        .symbol
+                          continuationA    1100
+                          continuationB    1101
+                          rads             27
+                        
+                        .code 0
+                        :main
+   0 L 5 1 0              mov r1 #0
+   1 X 31 1 15 0 20       trap r1 #15            ; di(0)
+   2 L 5 1 13             mov r1 #A
+   3 L 3 1 1100           st r1 continuationA    ; initially at beginning of A
+   4 L 5 1 28             mov r1 #B
+   5 L 3 1 1101           st r1 continuationB    ; initially at beginning of B
+   6 L 6 0 13             jmp A                  ; start co-routine
+                        
+                        :saveConA
+   7 D 10 0 27 2          add r0 rads #2
+   8 L 3 0 1100           st r0 continuationA
+   9 X 31 27 0 0 19       ret rads
+                        
+                        :saveConB
+  10 D 10 0 27 2          add r0 rads #2
+  11 L 3 0 1101           st r0 continuationB
+  12 X 31 27 0 0 19       ret rads
+                        
+                        :A
+  13 L 5 1 1              mov r1 #1
+  14 X 31 1 1 0 20        trap r1 #1             ; print 1
+                          ; co-call B
+  15 L 7 27 7             jal rads saveConA
+  16 L 1 27 1101          ld rads continuationB
+  17 X 31 27 0 0 19       ret rads
+  18 L 5 1 2              mov r1 #2              ; print 2
+  19 X 31 1 1 0 20        trap r1 #1
+                          ; co-call B
+  20 L 7 27 7             jal rads saveConA
+  21 L 1 27 1101          ld rads continuationB
+  22 X 31 27 0 0 19       ret rads
+  23 L 5 1 3              mov r1 #3      
+  24 X 31 1 1 0 20        trap r1 #1             ; print 3
+                          ; co-call B
+  25 L 7 27 7             jal rads saveConA
+  26 L 1 27 1101          ld rads continuationB
+  27 X 31 27 0 0 19       ret rads
+                          
+                        :B
+  28 L 5 2 97             mov r2 #97
+  29 X 31 2 2 0 20        trap r2 #2             ; print a
+                          ; co-call A
+  30 L 7 27 10            jal rads saveConB
+  31 L 1 27 1100          ld rads continuationA
+  32 X 31 27 0 0 19       ret rads
+  33 L 5 2 98             mov r2 #98             ; print b
+  34 X 31 2 2 0 20        trap r2 #2
+                          ; co-call A
+  35 L 7 27 10            jal rads saveConB
+  36 L 1 27 1100          ld rads continuationA
+  37 X 31 27 0 0 19       ret rads
+  38 L 5 1 99             mov r1 #99      
+  39 X 31 1 2 0 20        trap r1 #2             ; print c
+  40 X 31 0 0 0 20        trap r0 #0		 ; stop
+                        
+                        .data 200
+                        .end
