@@ -22,7 +22,7 @@ add_executable(sim21
 target_compile_options(sim21 PRIVATE -Og)
 
 # Optionally, add compile definitions or flags
-# target_compile_definitions(sim21 PRIVATE <DEFINE>)
+# target_compile_definitions(sim21 PRIVATE -DENABLE_TRACE_DISPLAY_LOG)
 
 # Optionally, link to other libraries (if needed)
 target_link_libraries(sim21 PRIVATE m)

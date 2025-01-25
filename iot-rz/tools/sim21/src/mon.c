@@ -62,7 +62,11 @@ PRIVATE int isbreak(void){
 }
 
 PRIVATE void trace(void){
+#ifdef ENABLE_TRACE_DISPLAY_LOG
+	display = 1;
+#else
 	display = 0;
+#endif /* ENABLE_TRACE_DISPLAY_LOG */
 	while(!isbreak() && runflag && uclock < MAXSIM)
 		runoneclock();
 	display = 1;
