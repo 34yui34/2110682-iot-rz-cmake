@@ -32,7 +32,7 @@
 #define GEI 22
 #define SHLI 23
 #define SHRI 24
-#define MODI 25
+#define MODI 26
 #define XOP 31
 
 #define ADD 0		// xop
